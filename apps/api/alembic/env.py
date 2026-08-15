@@ -6,6 +6,9 @@ from sqlalchemy import engine_from_config, pool
 from app.config import settings
 from app.database import Base
 
+# ایمپورت همه مدل‌ها تا روی Base.metadata رجیستر شوند (لازم برای autogenerate)
+import app.models  # noqa: F401,E402
+
 # this is the Alembic Config object, which provides access to values within
 # the .ini file in use.
 config = context.config
