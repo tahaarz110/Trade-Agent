@@ -1,0 +1,29 @@
+# --- Python / API -----------------------------------------------------------
+__pycache__/
+*.pyc
+.venv/
+venv/
+apps/api/.env
+
+# --- Node / Web --------------------------------------------------------------
+node_modules/
+.next/
+out/
+apps/web/.env
+apps/web/.env.local
+
+# --- Storage (runtime data, keep directory structure only) ------------------
+storage/attachments/*
+!storage/attachments/.gitkeep
+storage/backups/*
+!storage/backups/.gitkeep
+storage/analytics/parquet/*
+!storage/analytics/parquet/.gitkeep
+
+# --- Editors / OS -------------------------------------------------------------
+.vscode/
+.idea/
+.DS_Store
+
+# --- Root env -----------------------------------------------------------------
+.env

@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: #f7f8fa;
+  color: #1a1d23;
+}
+
+/* Technical/LTR fields (symbol, price, ticket, position id, magic number,
+   API endpoints, code identifiers) must render left-to-right even inside
+   an RTL page, per the Master Prompt's Persian/RTL requirement. */
+.ltr-field {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-family: Vazirmatn, Consolas, monospace;
+  text-align: left;
+}
