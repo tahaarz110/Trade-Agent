@@ -5,6 +5,7 @@ Phase 0 scope: app factory, CORS, logging, generic error handling, and the
 in later phases and simply get `include_router`-ed here.
 """
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
@@ -13,10 +14,23 @@ from fastapi.responses import JSONResponse
 
 from app.config import settings
 from app.logging_config import configure_logging
-from app.routers import health
+from app.routers import accounts, attachments, field_definitions, field_options, field_sections, health, symbols, trades
 
 configure_logging()
 logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    settings.ensure_storage_dirs()
+    logger.info(
+        "Starting %s (env=%s, low_resource_mode=%s, ai_narrator_enabled=%s)",
+        settings.app_name,
+        settings.app_env,
+        settings.low_resource_mode,
+        settings.ai_narrator_enabled,
+    )
+    yield
 
 
 def create_app() -> FastAPI:
@@ -24,6 +38,7 @@ def create_app() -> FastAPI:
         title=settings.app_name,
         version="0.1.0",
         description="Professional ICT Trading Journal — Offline Intelligence Engine API",
+        lifespan=lifespan,
     )
 
     app.add_middleware(
@@ -33,17 +48,6 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-
-    @app.on_event("startup")
-    async def on_startup() -> None:
-        settings.ensure_storage_dirs()
-        logger.info(
-            "Starting %s (env=%s, low_resource_mode=%s, ai_narrator_enabled=%s)",
-            settings.app_name,
-            settings.app_env,
-            settings.low_resource_mode,
-            settings.ai_narrator_enabled,
-        )
 
     # --- Global error handling ------------------------------------------------
     @app.exception_handler(RequestValidationError)
@@ -66,6 +70,13 @@ def create_app() -> FastAPI:
 
     # --- Routers ---------------------------------------------------------------
     app.include_router(health.router)
+    app.include_router(accounts.router)
+    app.include_router(symbols.router)
+    app.include_router(trades.router)
+    app.include_router(attachments.router)
+    app.include_router(field_sections.router)
+    app.include_router(field_definitions.router)
+    app.include_router(field_options.router)
 
     @app.get("/")
     def root() -> dict:

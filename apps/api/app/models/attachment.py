@@ -20,6 +20,9 @@ class Attachment(UUIDPKMixin, CreatedAtOnlyMixin, Base):
         UUID(as_uuid=True), ForeignKey("trades.id", ondelete="CASCADE"), nullable=False
     )
     file_path: Mapped[str] = mapped_column(Text, nullable=False)
+    # مسیر تصویر بندانگشتی (thumbnail) تولیدشده توسط سرویس پیوست‌ها؛
+    # برای فایل‌های غیرتصویری خالی می‌ماند. افزوده‌شده در فاز ۲.
+    thumbnail_path: Mapped[Optional[str]] = mapped_column(Text)
     file_name: Mapped[str] = mapped_column(String(255), nullable=False)
     mime_type: Mapped[Optional[str]] = mapped_column(String(100))
     file_size: Mapped[Optional[int]] = mapped_column(Integer)
