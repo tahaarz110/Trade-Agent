@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchHealth } from "@/lib/api";
 
@@ -32,7 +34,7 @@ export default function HomePage() {
     <main className="mx-auto flex min-h-screen max-w-4xl flex-col gap-8 px-6 py-12">
       <header className="flex flex-col gap-2">
         <span className="w-fit rounded-full bg-brand-100 px-3 py-1 text-xs font-medium text-brand-700">
-          فاز صفر — اسکلت پروژه
+          فاز ۴ — رابط کاربری اصلی
         </span>
         <h1 className="text-3xl font-bold text-slate-900">
           ژورنال معاملاتی حرفه‌ای ICT
@@ -41,6 +43,13 @@ export default function HomePage() {
           سامانه آفلاین‌محور ثبت، تحلیل و بهبود عملکرد معاملاتی — نسخه حرفه‌ای
           با موتور هوش تحلیلی داخلی و بدون وابستگی به مدل‌های زبانی بزرگ.
         </p>
+        <Link
+          href="/trades"
+          className="mt-2 flex w-fit items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700"
+        >
+          ورود به ژورنال معاملات
+          <ArrowLeft className="h-4 w-4" />
+        </Link>
       </header>
 
       <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -113,7 +122,7 @@ export default function HomePage() {
       </section>
 
       <footer className="text-xs text-slate-400">
-        این صفحه بخشی از اسکلت اولیه پروژه (فاز ۰) است. ماژول‌های تحلیلی و
+        این صفحه بخشی از رابط کاربری پروژه (فاز ۴) است. ماژول‌های تحلیلی و
         هوش آفلاین در فازهای بعدی پیاده‌سازی می‌شوند.
       </footer>
     </main>

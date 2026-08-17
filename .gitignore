@@ -27,3 +27,4 @@ storage/analytics/parquet/*
 
 # --- Root env -----------------------------------------------------------------
 .env
+apps/web/tsconfig.tsbuildinfo
