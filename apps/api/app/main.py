@@ -15,7 +15,19 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.logging_config import configure_logging
-from app.routers import accounts, attachments, field_definitions, field_options, field_sections, health, symbols, trades
+from app.routers import (
+    accounts,
+    attachments,
+    checklist,
+    field_definitions,
+    field_options,
+    field_sections,
+    health,
+    symbols,
+    theme,
+    trades,
+    ui_tabs,
+)
 
 configure_logging()
 logger = logging.getLogger(__name__)
@@ -81,6 +93,9 @@ def create_app() -> FastAPI:
     app.include_router(field_sections.router)
     app.include_router(field_definitions.router)
     app.include_router(field_options.router)
+    app.include_router(checklist.router)
+    app.include_router(theme.router)
+    app.include_router(ui_tabs.router)
 
     # صرفاً پیوست‌های معاملات (تصاویر/فایل‌ها) از این مسیر serve می‌شوند؛
     # مسیرهای ذخیره‌شده در دیتابیس نسبت به ATTACHMENT_DIR نسبی‌اند تا هیچ

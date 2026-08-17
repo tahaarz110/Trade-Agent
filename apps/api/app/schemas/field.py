@@ -7,6 +7,7 @@ from typing import Any, Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.enums import FieldType
+from app.schemas.common import ReorderItem, ReorderRequest  # noqa: F401 -- برای سازگاری با ایمپورت‌های قبلی
 
 
 # --- FieldSection ------------------------------------------------------------
@@ -143,13 +144,3 @@ class FieldDefinitionRead(BaseModel):
     created_at: datetime
     updated_at: datetime
     options: list[FieldOptionRead] = []
-
-
-# --- Reorder ------------------------------------------------------------------
-class ReorderItem(BaseModel):
-    id: uuid.UUID
-    sort_order: int
-
-
-class ReorderRequest(BaseModel):
-    items: list[ReorderItem]
