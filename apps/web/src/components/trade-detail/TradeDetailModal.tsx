@@ -97,16 +97,16 @@ export function TradeDetailModal({ tradeId, onClose }: TradeDetailModalProps) {
                 label="وضعیت"
                 value={trade.status === "open" ? "باز" : trade.status === "closed" ? "بسته" : "لغوشده"}
               />
-              <SummaryItem label="قیمت ورود" value={String(trade.entry_price)} ltr />
-              <SummaryItem label="قیمت خروج" value={trade.exit_price != null ? String(trade.exit_price) : "—"} ltr />
-              <SummaryItem label="حجم" value={String(trade.volume)} ltr />
+              <SummaryItem label="قیمت ورود" value={trade.entry_price} ltr />
+              <SummaryItem label="قیمت خروج" value={trade.exit_price ?? "—"} ltr />
+              <SummaryItem label="حجم" value={trade.volume} ltr />
               <SummaryItem
                 label="سود/زیان خالص"
-                value={trade.net_profit != null ? String(trade.net_profit) : "—"}
+                value={trade.net_profit ?? "—"}
                 ltr
                 valueClassName={
                   trade.net_profit != null
-                    ? trade.net_profit >= 0
+                    ? Number(trade.net_profit) >= 0
                       ? "text-emerald-600"
                       : "text-rose-600"
                     : undefined

@@ -11,6 +11,7 @@ from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.logging_config import configure_logging
@@ -34,6 +35,9 @@ async def lifespan(app: FastAPI):
 
 
 def create_app() -> FastAPI:
+    # پیش از mount کردن StaticFiles باید مسیر پیوست‌ها موجود باشد
+    settings.ensure_storage_dirs()
+
     app = FastAPI(
         title=settings.app_name,
         version="0.1.0",
@@ -77,6 +81,15 @@ def create_app() -> FastAPI:
     app.include_router(field_sections.router)
     app.include_router(field_definitions.router)
     app.include_router(field_options.router)
+
+    # صرفاً پیوست‌های معاملات (تصاویر/فایل‌ها) از این مسیر serve می‌شوند؛
+    # مسیرهای ذخیره‌شده در دیتابیس نسبت به ATTACHMENT_DIR نسبی‌اند تا هیچ
+    # مسیر مطلق فایل‌سیستم سرور به کلاینت لو نرود.
+    app.mount(
+        "/attachments/files",
+        StaticFiles(directory=settings.attachment_dir),
+        name="attachment-files",
+    )
 
     @app.get("/")
     def root() -> dict:

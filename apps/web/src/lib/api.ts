@@ -181,9 +181,9 @@ export async function deleteAttachment(attachmentId: string): Promise<void> {
   return request(`/attachments/${attachmentId}`, { method: "DELETE" });
 }
 
-export function attachmentUrl(path: string): string {
-  // در فاز‌های بعدی، بک‌اند یک endpoint استاتیک برای پیوست‌ها ارائه می‌دهد.
-  // فعلاً مسیر خام را برمی‌گردانیم تا بعداً به‌سادگی جایگزین شود.
-  return `${API_BASE_URL}/static/${path}`;
+export function attachmentUrl(relativePath: string): string {
+  // بک‌اند پیوست‌ها را از مسیر امن /attachments/files (نسبی به ATTACHMENT_DIR)
+  // serve می‌کند؛ هرگز مسیر مطلق فایل‌سیستم سرور در پاسخ API وجود ندارد.
+  return `${API_BASE_URL}/attachments/files/${relativePath}`;
 }
 

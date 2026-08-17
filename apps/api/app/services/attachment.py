@@ -28,6 +28,15 @@ class AttachmentService:
         d.mkdir(parents=True, exist_ok=True)
         return d
 
+    def _to_relative(self, absolute_path: Path) -> str:
+        """مسیر مطلق را نسبت به ATTACHMENT_DIR نسبی می‌کند تا هرگز مسیر
+        واقعی فایل‌سیستم سرور به کلاینت لو نرود و صرفاً از طریق endpoint
+        استاتیک امن (/attachments/files/...) قابل دسترسی باشد."""
+        return str(absolute_path.relative_to(Path(settings.attachment_dir)))
+
+    def _to_absolute(self, relative_path: str) -> Path:
+        return Path(settings.attachment_dir) / relative_path
+
     def upload(
         self,
         *,
@@ -52,15 +61,15 @@ class AttachmentService:
         dest_path.write_bytes(data)
         file_size = len(data)
 
-        thumbnail_path: Optional[str] = None
+        thumbnail_relative: Optional[str] = None
         is_image = bool(content_type) and content_type.startswith(IMAGE_MIME_PREFIXES)
         if is_image:
-            thumbnail_path = self._generate_thumbnail(dest_path, dest_dir, safe_name)
+            thumbnail_relative = self._generate_thumbnail(dest_path, dest_dir, safe_name)
 
         attachment = Attachment(
             trade_id=trade_id,
-            file_path=str(dest_path),
-            thumbnail_path=thumbnail_path,
+            file_path=self._to_relative(dest_path),
+            thumbnail_path=thumbnail_relative,
             file_name=file_name,
             mime_type=content_type,
             file_size=file_size,
@@ -72,9 +81,10 @@ class AttachmentService:
         return attachment
 
     def _generate_thumbnail(self, source_path: Path, dest_dir: Path, safe_name: str) -> Optional[str]:
-        """تصویر بندانگشتی ۳۲۰x۳۲۰ (حفظ نسبت ابعاد) می‌سازد. اگر فایل
-        تصویر معتبر نباشد (مثلاً corrupt) بدون خطا None برمی‌گرداند تا
-        آپلود اصلی fail نشود."""
+        """تصویر بندانگشتی ۳۲۰x۳۲۰ (حفظ نسبت ابعاد) می‌سازد و مسیر نسبی
+        آن (نسبت به ATTACHMENT_DIR) را برمی‌گرداند. اگر فایل تصویر معتبر
+        نباشد (مثلاً corrupt) بدون خطا None برمی‌گرداند تا آپلود اصلی
+        fail نشود."""
         try:
             with Image.open(source_path) as img:
                 img = img.convert("RGB") if img.mode not in ("RGB", "L") else img
@@ -82,7 +92,7 @@ class AttachmentService:
                 thumb_name = f"thumb_{safe_name.rsplit('.', 1)[0]}.jpg"
                 thumb_path = dest_dir / thumb_name
                 img.save(thumb_path, format="JPEG", quality=85)
-                return str(thumb_path)
+                return self._to_relative(thumb_path)
         except Exception:  # noqa: BLE001 - فایل تصویر نامعتبر، نادیده گرفته می‌شود
             return None
 
@@ -101,9 +111,9 @@ class AttachmentService:
         if not attachment:
             raise NotFoundError("پیوست", attachment_id)
 
-        for path_str in (attachment.file_path, attachment.thumbnail_path):
-            if path_str:
-                Path(path_str).unlink(missing_ok=True)
+        for relative_path in (attachment.file_path, attachment.thumbnail_path):
+            if relative_path:
+                self._to_absolute(relative_path).unlink(missing_ok=True)
 
         self.repo.delete(attachment)
         self.db.commit()

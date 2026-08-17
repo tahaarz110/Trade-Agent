@@ -130,6 +130,7 @@ function TradeFormInner({
     register,
     handleSubmit,
     reset,
+    setValue,
     watch,
     formState: { errors, isSubmitting },
   } = useForm<CoreFormValues>({
@@ -244,7 +245,7 @@ function TradeFormInner({
     const tpl = templates.find((t) => t.name === name);
     if (!tpl) return;
     Object.entries(tpl.values).forEach(([key, value]) => {
-      reset((prev) => ({ ...prev, [key]: value }), { keepDefaultValues: true });
+      setValue(key as keyof CoreFormValues, value as never, { shouldValidate: true, shouldDirty: true });
     });
   }
 
@@ -333,7 +334,7 @@ function TradeFormInner({
             </label>
             <SearchableSelect
               value={watch("account_id") ?? null}
-              onChange={(v) => reset((prev) => ({ ...prev, account_id: (v as string) ?? "" }), { keepDefaultValues: true })}
+              onChange={(v) => setValue("account_id", (v as string) ?? "", { shouldValidate: true, shouldDirty: true })}
               options={accounts.map((a) => ({ value: a.id, label: a.name }))}
               placeholder="انتخاب حساب..."
               error={errors.account_id?.message}
@@ -346,7 +347,7 @@ function TradeFormInner({
             </label>
             <SearchableSelect
               value={watch("symbol_id") ?? null}
-              onChange={(v) => reset((prev) => ({ ...prev, symbol_id: (v as string) ?? "" }), { keepDefaultValues: true })}
+              onChange={(v) => setValue("symbol_id", (v as string) ?? "", { shouldValidate: true, shouldDirty: true })}
               options={symbolOptions}
               placeholder="انتخاب نماد..."
               error={errors.symbol_id?.message}
@@ -360,7 +361,7 @@ function TradeFormInner({
                 <button
                   key={dir}
                   type="button"
-                  onClick={() => reset((prev) => ({ ...prev, direction: dir }), { keepDefaultValues: true })}
+                  onClick={() => setValue("direction", dir, { shouldValidate: true, shouldDirty: true })}
                   className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition ${
                     watch("direction") === dir
                       ? dir === "buy"

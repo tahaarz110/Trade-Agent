@@ -105,19 +105,22 @@ export interface Trade {
   entry_time: string;
   exit_time: string | null;
   duration_minutes: number | null;
-  entry_price: number;
-  exit_price: number | null;
-  stop_loss: number | null;
-  take_profit: number | null;
-  volume: number;
-  commission: number;
-  swap: number;
-  gross_profit: number | null;
-  net_profit: number | null;
-  risk_amount: number | null;
-  risk_percent: number | null;
-  r_multiple: number | null;
-  pips: number | null;
+  // توجه: فیلدهای مالی در بک‌اند از نوع NUMERIC/Decimal هستند و توسط
+  // Pydantic به‌صورت رشته (نه عدد) سریالایز می‌شوند تا از خطای گرد کردن
+  // اعشار در JavaScript جلوگیری شود. همیشه قبل از محاسبه با Number() تبدیل کنید.
+  entry_price: string;
+  exit_price: string | null;
+  stop_loss: string | null;
+  take_profit: string | null;
+  volume: string;
+  commission: string;
+  swap: string;
+  gross_profit: string | null;
+  net_profit: string | null;
+  risk_amount: string | null;
+  risk_percent: string | null;
+  r_multiple: string | null;
+  pips: string | null;
   needs_review: boolean;
   review_status: string | null;
   created_at: string;

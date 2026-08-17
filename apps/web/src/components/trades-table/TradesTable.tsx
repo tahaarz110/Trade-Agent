@@ -98,11 +98,12 @@ export function TradesTable({ onRowClick }: TradesTableProps) {
       columnHelper.accessor("net_profit", {
         header: "سود/زیان خالص",
         cell: (info) => {
-          const v = info.getValue();
-          if (v == null) return <span className="text-slate-400">—</span>;
+          const raw = info.getValue();
+          if (raw == null) return <span className="text-slate-400">—</span>;
+          const v = Number(raw);
           return (
             <span className={cn("font-ltr font-medium", v >= 0 ? "text-emerald-600" : "text-rose-600")}>
-              {v}
+              {raw}
             </span>
           );
         },
