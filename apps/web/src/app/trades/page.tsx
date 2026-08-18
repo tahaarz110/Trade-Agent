@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import Link from "next/link";
+import { Plus, Settings } from "lucide-react";
 
 import { Modal } from "@/components/ui/Modal";
 import { DynamicTradeForm } from "@/components/trade-form/DynamicTradeForm";
@@ -28,6 +29,16 @@ export default function TradesPage() {
           معامله جدید
         </button>
       </header>
+
+      <div className="mb-4 flex justify-end">
+        <Link
+          href="/settings"
+          className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-brand-600"
+        >
+          <Settings className="h-4 w-4" />
+          تنظیمات
+        </Link>
+      </div>
 
       <TradesTable onRowClick={(trade) => setSelectedTrade(trade)} />
 
