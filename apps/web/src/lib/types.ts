@@ -159,3 +159,44 @@ export interface Page<T> {
 }
 
 export type CustomFieldValues = Record<string, unknown>;
+
+// --- Checklist -------------------------------------------------------------------
+export interface ChecklistItem {
+  id: string;
+  template_id: string;
+  title: string;
+  description: string | null;
+  is_required: boolean;
+  sort_order: number;
+}
+
+export interface ChecklistTemplate {
+  id: string;
+  name: string;
+  description: string | null;
+  is_default: boolean;
+  is_active: boolean;
+  items: ChecklistItem[];
+}
+
+// --- Theme -----------------------------------------------------------------------
+export interface ThemeSetting {
+  id: string;
+  key: string;
+  theme_name: string;
+  font_family: string | null;
+  font_size: string | null;
+  density: string | null;
+  primary_color: string | null;
+  settings: Record<string, unknown> | null;
+}
+
+// --- UI Tabs -----------------------------------------------------------------------
+export interface UITab {
+  id: string;
+  key: string;
+  title: string;
+  icon: string | null;
+  is_visible: boolean;
+  sort_order: number;
+}

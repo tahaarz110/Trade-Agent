@@ -38,7 +38,7 @@ class Trade(UUIDPKMixin, TimestampMixin, Base):
     )
 
     account_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("accounts.id", ondelete="CASCADE"), nullable=False
+        UUID(as_uuid=True), ForeignKey("accounts.id", ondelete="RESTRICT"), nullable=False
     )
     symbol_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("symbols.id", ondelete="RESTRICT"), nullable=False

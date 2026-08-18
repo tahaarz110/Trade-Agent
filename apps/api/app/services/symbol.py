@@ -9,7 +9,7 @@ from app.models.symbol import Symbol
 from app.repositories.symbol import SymbolRepository
 from app.schemas.pagination import PaginationParams
 from app.schemas.symbol import SymbolCreate, SymbolUpdate
-from app.services import ConflictError, NotFoundError
+from app.services import ConflictError, NotFoundError, ValidationAppError
 
 
 class SymbolService:
@@ -55,5 +55,12 @@ class SymbolService:
 
     def delete(self, symbol_id: uuid.UUID) -> None:
         symbol = self.get(symbol_id)
-        self.repo.delete(symbol)
-        self.db.commit()
+        try:
+            self.repo.delete(symbol)
+            self.db.commit()
+        except IntegrityError as exc:
+            self.db.rollback()
+            raise ValidationAppError(
+                "این نماد در معاملات ثبت‌شده استفاده شده و برای حفظ یکپارچگی تاریخچه "
+                "قابل حذف نیست؛ به‌جای حذف، آن را غیرفعال کنید"
+            ) from exc

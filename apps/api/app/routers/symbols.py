@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.schemas.pagination import Page, PaginationParams
 from app.schemas.symbol import SymbolCreate, SymbolRead, SymbolUpdate
-from app.services import ConflictError, NotFoundError
+from app.services import ConflictError, NotFoundError, ValidationAppError
 from app.services.symbol import SymbolService
 
 router = APIRouter(prefix="/symbols", tags=["symbols"])
@@ -67,3 +67,5 @@ def delete_symbol(symbol_id: uuid.UUID, db: Session = Depends(get_db)) -> None:
         SymbolService(db).delete(symbol_id)
     except NotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValidationAppError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc

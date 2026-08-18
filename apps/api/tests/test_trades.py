@@ -125,3 +125,37 @@ def test_trades_pagination(client, account_id, symbol_id):
     assert body["total"] == 15
     assert len(body["items"]) == 5
     assert body["page"] == 2
+
+
+def test_delete_account_with_trades_is_blocked(client, account_id, symbol_id):
+    """باگ بحرانی رفع‌شده: حذف حساب دارای معامله نباید معاملات را
+    CASCADE پاک کند؛ باید با خطای واضح مسدود شود."""
+    client.post(
+        "/trades",
+        json={
+            "account_id": account_id,
+            "symbol_id": symbol_id,
+            "direction": "buy",
+            "entry_time": "2026-08-01T08:00:00Z",
+            "entry_price": "1.1",
+            "volume": "1.0",
+        },
+    )
+    resp = client.delete(f"/accounts/{account_id}")
+    assert resp.status_code == 422
+
+
+def test_delete_symbol_with_trades_is_blocked(client, account_id, symbol_id):
+    client.post(
+        "/trades",
+        json={
+            "account_id": account_id,
+            "symbol_id": symbol_id,
+            "direction": "buy",
+            "entry_time": "2026-08-01T08:00:00Z",
+            "entry_price": "1.1",
+            "volume": "1.0",
+        },
+    )
+    resp = client.delete(f"/symbols/{symbol_id}")
+    assert resp.status_code == 422

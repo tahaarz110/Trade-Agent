@@ -29,9 +29,7 @@ class Account(UUIDPKMixin, TimestampMixin, Base):
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     notes: Mapped[Optional[str]] = mapped_column(Text)
 
-    trades: Mapped[list["Trade"]] = relationship(
-        back_populates="account", cascade="all, delete-orphan"
-    )
+    trades: Mapped[list["Trade"]] = relationship(back_populates="account")
     prop_rules: Mapped[list["PropRule"]] = relationship(
         back_populates="account", cascade="all, delete-orphan"
     )

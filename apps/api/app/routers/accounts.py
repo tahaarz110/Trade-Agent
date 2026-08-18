@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.schemas.account import AccountCreate, AccountRead, AccountUpdate
 from app.schemas.pagination import Page, PaginationParams
-from app.services import NotFoundError
+from app.services import NotFoundError, ValidationAppError
 from app.services.account import AccountService
 
 router = APIRouter(prefix="/accounts", tags=["accounts"])
@@ -62,3 +62,5 @@ def delete_account(account_id: uuid.UUID, db: Session = Depends(get_db)) -> None
         AccountService(db).delete(account_id)
     except NotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValidationAppError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc

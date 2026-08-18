@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import uuid
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models.account import Account
 from app.repositories.account import AccountRepository
 from app.schemas.account import AccountCreate, AccountUpdate
 from app.schemas.pagination import PaginationParams
-from app.services import NotFoundError
+from app.services import NotFoundError, ValidationAppError
 
 
 class AccountService:
@@ -46,5 +47,12 @@ class AccountService:
 
     def delete(self, account_id: uuid.UUID) -> None:
         account = self.get(account_id)
-        self.repo.delete(account)
-        self.db.commit()
+        try:
+            self.repo.delete(account)
+            self.db.commit()
+        except IntegrityError as exc:
+            self.db.rollback()
+            raise ValidationAppError(
+                "این حساب دارای معاملات ثبت‌شده است و برای حفظ یکپارچگی تاریخچه "
+                "قابل حذف نیست؛ به‌جای حذف، آن را غیرفعال کنید"
+            ) from exc
