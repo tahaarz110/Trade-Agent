@@ -94,6 +94,12 @@ class TradeFieldValueRead(BaseModel):
 
 
 class TradeDetailRead(TradeRead):
-    """پاسخ endpoint جزئیات معامله: فیلدهای اصلی + مقادیر فیلدهای پویا."""
+    """پاسخ endpoint جزئیات معامله: فیلدهای اصلی + مقادیر فیلدهای پویا +
+    خلاصه سبک چک‌لیست (فاز ۵.۵). برای جزئیات کامل چک‌لیست (آیتم‌ها،
+    یادداشت‌ها) از GET /trades/{id}/checklist استفاده شود."""
 
     custom_fields: list[TradeFieldValueRead] = Field(default_factory=list)
+    has_checklist: bool = False
+    checklist_template_title: Optional[str] = None
+    checklist_score_percent: Optional[float] = None
+    required_missing_count: int = 0

@@ -81,6 +81,8 @@ def delete_template(template_id: uuid.UUID, db: Session = Depends(get_db)) -> No
         ChecklistTemplateService(db).delete(template_id)
     except NotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValidationAppError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 # --- آیتم‌های چک‌لیست ---------------------------------------------------------------
@@ -119,6 +121,24 @@ def reorder_items(
     except NotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     return [ChecklistItemRead.model_validate(i) for i in items]
+
+
+@router.post("/items/{item_id}/enable", response_model=ChecklistItemRead)
+def enable_item(item_id: uuid.UUID, db: Session = Depends(get_db)) -> ChecklistItemRead:
+    try:
+        item = ChecklistItemService(db).set_active(item_id, True)
+    except NotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return ChecklistItemRead.model_validate(item)
+
+
+@router.post("/items/{item_id}/disable", response_model=ChecklistItemRead)
+def disable_item(item_id: uuid.UUID, db: Session = Depends(get_db)) -> ChecklistItemRead:
+    try:
+        item = ChecklistItemService(db).set_active(item_id, False)
+    except NotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return ChecklistItemRead.model_validate(item)
 
 
 @router.delete("/items/{item_id}", status_code=status.HTTP_204_NO_CONTENT, response_model=None)

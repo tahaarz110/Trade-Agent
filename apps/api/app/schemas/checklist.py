@@ -23,6 +23,7 @@ class ChecklistItemUpdate(BaseModel):
     title: Optional[str] = Field(default=None, min_length=1, max_length=300)
     description: Optional[str] = None
     is_required: Optional[bool] = None
+    is_active: Optional[bool] = None
     sort_order: Optional[int] = None
 
 
@@ -31,6 +32,7 @@ class ChecklistItemRead(ChecklistItemBase):
 
     id: uuid.UUID
     template_id: uuid.UUID
+    is_active: bool
 
 
 # --- ChecklistTemplate -----------------------------------------------------------

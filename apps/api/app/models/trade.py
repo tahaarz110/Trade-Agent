@@ -43,6 +43,15 @@ class Trade(UUIDPKMixin, TimestampMixin, Base):
     symbol_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("symbols.id", ondelete="RESTRICT"), nullable=False
     )
+    # فاز ۵.۵ (اصلاحی): قالب چک‌لیست اختصاص‌داده‌شده به این معامله. هنگام
+    # تغییر قالب، پاسخ‌های قبلی حذف نمی‌شوند (فقط دیگر نمایش داده
+    # نمی‌شوند) تا یکپارچگی تاریخی حفظ شود؛ حذف قالب هم SET NULL می‌کند
+    # نه CASCADE، تا معامله هرگز به‌خاطر حذف قالب از بین نرود.
+    checklist_template_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("checklist_templates.id", ondelete="SET NULL"),
+        nullable=True,
+    )
 
     direction: Mapped[TradeDirection] = mapped_column(
         portable_enum(TradeDirection, "trade_direction"), nullable=False
@@ -90,6 +99,7 @@ class Trade(UUIDPKMixin, TimestampMixin, Base):
     # --- روابط ---------------------------------------------------------------
     account: Mapped["Account"] = relationship(back_populates="trades")
     symbol: Mapped["Symbol"] = relationship(back_populates="trades")
+    checklist_template: Mapped[Optional["ChecklistTemplate"]] = relationship()
     attachments: Mapped[list["Attachment"]] = relationship(
         back_populates="trade", cascade="all, delete-orphan"
     )

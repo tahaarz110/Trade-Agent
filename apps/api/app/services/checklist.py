@@ -57,6 +57,11 @@ class ChecklistTemplateService:
 
     def delete(self, template_id: uuid.UUID) -> None:
         template = self.get(template_id)
+        if self.repo.has_historical_usage(template_id):
+            raise ValidationAppError(
+                "این قالب توسط معامله‌ای استفاده شده یا آیتم‌های آن پاسخ تاریخی دارند؛ "
+                "برای حفظ یکپارچگی تاریخچه قابل حذف نیست؛ به‌جای حذف، آن را غیرفعال کنید"
+            )
         self.repo.delete(template)
         self.db.commit()
 
@@ -94,6 +99,13 @@ class ChecklistItemService:
         item = self.get(item_id)
         for key, value in payload.model_dump(exclude_unset=True).items():
             setattr(item, key, value)
+        self.db.commit()
+        self.db.refresh(item)
+        return item
+
+    def set_active(self, item_id: uuid.UUID, is_active: bool) -> ChecklistItem:
+        item = self.get(item_id)
+        item.is_active = is_active
         self.db.commit()
         self.db.refresh(item)
         return item

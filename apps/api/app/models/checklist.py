@@ -37,6 +37,9 @@ class ChecklistItem(UUIDPKMixin, Base):
     title: Mapped[str] = mapped_column(String(300), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text)
     is_required: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # فاز ۵.۵ (اصلاحی): برای غیرفعال‌سازی به‌جای حذف مخرب آیتم‌هایی که
+    # پاسخ تاریخی دارند، و رد پاسخ‌دهی تازه به آیتم‌های غیرفعال.
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     template: Mapped["ChecklistTemplate"] = relationship(back_populates="items")

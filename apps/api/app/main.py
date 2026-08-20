@@ -25,6 +25,7 @@ from app.routers import (
     health,
     symbols,
     theme,
+    trade_checklist,
     trades,
     ui_tabs,
 )
@@ -89,6 +90,7 @@ def create_app() -> FastAPI:
     app.include_router(accounts.router)
     app.include_router(symbols.router)
     app.include_router(trades.router)
+    app.include_router(trade_checklist.router)
     app.include_router(attachments.router)
     app.include_router(field_sections.router)
     app.include_router(field_definitions.router)

@@ -220,8 +220,20 @@ class TradeService:
                     value=raw,
                 )
             )
+
+        # فاز ۵.۵: خلاصه سبک چک‌لیست بدون سنگین کردن این endpoint
+        from app.services.trade_checklist import TradeChecklistService
+
+        checklist_summary = TradeChecklistService(self.db).get_summary(trade)
+
         return TradeDetailRead.model_validate(trade, from_attributes=True).model_copy(
-            update={"custom_fields": custom_fields}
+            update={
+                "custom_fields": custom_fields,
+                "has_checklist": checklist_summary.has_checklist,
+                "checklist_template_title": checklist_summary.checklist_template_title,
+                "checklist_score_percent": checklist_summary.checklist_score_percent,
+                "required_missing_count": checklist_summary.required_missing_count,
+            }
         )
 
     def list(
