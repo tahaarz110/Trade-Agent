@@ -1,6 +1,7 @@
 import type {
   Account,
   Attachment,
+  ChecklistAnswerInput,
   ChecklistItem,
   ChecklistTemplate,
   FieldDefinition,
@@ -11,6 +12,7 @@ import type {
   Symbol,
   ThemeSetting,
   Trade,
+  TradeChecklist,
   TradeDetail,
   UITab,
 } from "./types";
@@ -327,6 +329,11 @@ export async function toggleChecklistTemplate(
 ): Promise<ChecklistTemplate> {
   return request(`/checklist-templates/${id}/${enable ? "enable" : "disable"}`, { method: "POST" });
 }
+export async function toggleChecklistItem(id: string, enable: boolean): Promise<ChecklistItem> {
+  return request(`/checklist-templates/items/${id}/${enable ? "enable" : "disable"}`, {
+    method: "POST",
+  });
+}
 export async function deleteChecklistTemplate(id: string): Promise<void> {
   return request(`/checklist-templates/${id}`, { method: "DELETE" });
 }
@@ -383,5 +390,24 @@ export async function reorderUITabs(items: ReorderItem[]): Promise<UITab[]> {
 }
 export async function deleteUITab(id: string): Promise<void> {
   return request(`/ui-tabs/${id}`, { method: "DELETE" });
+}
+
+// --- Trade checklist (فاز ۵.۵) -----------------------------------------------------
+export async function fetchTradeChecklist(tradeId: string): Promise<TradeChecklist> {
+  return request(`/trades/${tradeId}/checklist`);
+}
+
+export async function updateTradeChecklist(
+  tradeId: string,
+  payload: { checklist_template_id: string | null; answers: ChecklistAnswerInput[] }
+): Promise<TradeChecklist> {
+  return request(`/trades/${tradeId}/checklist`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function assignDefaultChecklist(tradeId: string): Promise<TradeChecklist> {
+  return request(`/trades/${tradeId}/checklist/assign-default`, { method: "POST" });
 }
 

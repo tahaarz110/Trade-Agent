@@ -7,6 +7,7 @@ import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/styles.css";
 
 import { Modal } from "@/components/ui/Modal";
+import { ChecklistCard } from "@/components/trade-form/ChecklistCard";
 import {
   attachmentUrl,
   fetchAccounts,
@@ -112,6 +113,20 @@ export function TradeDetailModal({ tradeId, onClose }: TradeDetailModalProps) {
                     : undefined
                 }
               />
+              {trade.has_checklist && (
+                <SummaryItem
+                  label="امتیاز چک‌لیست"
+                  value={
+                    trade.checklist_score_percent !== null
+                      ? `${trade.checklist_score_percent}٪`
+                      : "—"
+                  }
+                  ltr
+                  valueClassName={
+                    trade.required_missing_count > 0 ? "text-amber-600" : "text-emerald-600"
+                  }
+                />
+              )}
             </div>
 
             {/* --- فیلدهای پویا گروه‌بندی‌شده بر اساس سکشن ------------------------ */}
@@ -130,6 +145,12 @@ export function TradeDetailModal({ tradeId, onClose }: TradeDetailModalProps) {
                 </div>
               </div>
             ))}
+
+            {/* --- چک‌لیست (فاز ۵.۵) --------------------------------------------- */}
+            <div>
+              <h3 className="mb-2 text-sm font-semibold text-slate-700">چک‌لیست معامله</h3>
+              <ChecklistCard tradeId={trade.id} variant="detail" />
+            </div>
 
             {/* --- تصاویر ------------------------------------------------------- */}
             {attachments.length > 0 && (

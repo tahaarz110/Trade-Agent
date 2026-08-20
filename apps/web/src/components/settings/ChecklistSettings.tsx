@@ -14,6 +14,7 @@ import {
   fetchChecklistItems,
   fetchChecklistTemplates,
   reorderChecklistItems,
+  toggleChecklistItem,
   toggleChecklistTemplate,
 } from "@/lib/api";
 import type { ChecklistItem, ChecklistTemplate } from "@/lib/types";
@@ -172,6 +173,11 @@ function ChecklistItemsManager({ templateId }: { templateId: string }) {
     onError: (error: Error) => window.alert(`حذف آیتم ممکن نشد: ${error.message}`),
   });
 
+  const toggleItemMutation = useMutation({
+    mutationFn: ({ id, enable }: { id: string; enable: boolean }) => toggleChecklistItem(id, enable),
+    onSuccess: invalidate,
+  });
+
   const reorderMutation = useMutation({
     mutationFn: (items: ChecklistItem[]) =>
       reorderChecklistItems(
@@ -229,14 +235,25 @@ function ChecklistItemsManager({ templateId }: { templateId: string }) {
                 {item.title}
                 {item.is_required && <span className="mr-1 text-red-500">*</span>}
               </span>
-              <button
-                onClick={() => {
-                  if (window.confirm(`آیتم «${item.title}» حذف شود؟`)) deleteMutation.mutate(item.id);
-                }}
-                className="text-slate-400 hover:text-red-500"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => toggleItemMutation.mutate({ id: item.id, enable: !item.is_active })}
+                  className={cn(
+                    "rounded-full px-2 py-0.5 text-[10px] font-medium",
+                    item.is_active ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"
+                  )}
+                >
+                  {item.is_active ? "فعال" : "غیرفعال"}
+                </button>
+                <button
+                  onClick={() => {
+                    if (window.confirm(`آیتم «${item.title}» حذف شود؟`)) deleteMutation.mutate(item.id);
+                  }}
+                  className="text-slate-400 hover:text-red-500"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
             </div>
           )}
         />

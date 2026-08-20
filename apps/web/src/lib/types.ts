@@ -136,6 +136,10 @@ export interface TradeFieldValueRead {
 
 export interface TradeDetail extends Trade {
   custom_fields: TradeFieldValueRead[];
+  has_checklist: boolean;
+  checklist_template_title: string | null;
+  checklist_score_percent: number | null;
+  required_missing_count: number;
 }
 
 export interface Attachment {
@@ -160,6 +164,37 @@ export interface Page<T> {
 
 export type CustomFieldValues = Record<string, unknown>;
 
+// --- Trade checklist (فاز ۵.۵) -----------------------------------------------------
+export interface TradeChecklistItem {
+  id: string;
+  title: string;
+  description: string | null;
+  is_required: boolean;
+  sort_order: number;
+  is_active: boolean;
+  checked: boolean;
+  note: string | null;
+}
+
+export interface TradeChecklist {
+  trade_id: string;
+  checklist_template_id: string | null;
+  checklist_template_title: string | null;
+  items: TradeChecklistItem[];
+  total_items: number;
+  checked_items: number;
+  required_items: number;
+  required_checked_items: number;
+  required_missing_items: string[];
+  score_percent: number | null;
+}
+
+export interface ChecklistAnswerInput {
+  item_id: string;
+  checked: boolean;
+  note?: string | null;
+}
+
 // --- Checklist -------------------------------------------------------------------
 export interface ChecklistItem {
   id: string;
@@ -167,6 +202,7 @@ export interface ChecklistItem {
   title: string;
   description: string | null;
   is_required: boolean;
+  is_active: boolean;
   sort_order: number;
 }
 

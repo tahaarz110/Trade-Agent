@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/Input";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { ImageDropzone } from "@/components/ui/ImageDropzone";
+import { ChecklistCard } from "@/components/trade-form/ChecklistCard";
 import { FieldRenderer } from "@/components/trade-form/FieldRenderer";
 import { useDynamicFieldSchema } from "@/components/trade-form/useDynamicFieldSchema";
 import {
@@ -182,9 +183,16 @@ function TradeFormInner({
           setUploading(false);
         }
       }
-      onSuccess?.(trade.id);
+      // توجه: اینجا onSuccess والد را فراخوانی نمی‌کنیم؛ چون مودال را
+      // فوراً می‌بندد و کاربر فرصت تکمیل تصاویر/چک‌لیست معامله را که
+      // تازه پس از ثبت معامله در دسترس می‌شوند از دست می‌دهد (باگ فاز
+      // ۵.۵). به‌جای آن دکمه «پایان» صریح در پایین فرم نمایش داده می‌شود.
     },
   });
+
+  function handleFinish() {
+    if (pendingTradeId) onSuccess?.(pendingTradeId);
+  }
 
   async function onSubmit(values: CoreFormValues) {
     const payload: TradeCreatePayload = {
@@ -460,19 +468,51 @@ function TradeFormInner({
         )}
       </CollapsibleSection>
 
-      <div className="flex justify-end gap-3 border-t border-slate-100 pt-4">
-        <button
-          type="submit"
-          disabled={isSubmitting || createMutation.isPending}
-          className="flex items-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700 disabled:opacity-50"
-        >
-          {createMutation.isPending ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+      {/* --- چک‌لیست (فاز ۵.۵) ------------------------------------------------ */}
+      <CollapsibleSection title="چک‌لیست معامله" defaultOpen={false}>
+        {pendingTradeId ? (
+          <ChecklistCard tradeId={pendingTradeId} variant="form" />
+        ) : (
+          <p className="text-sm text-slate-500">
+            امکان انتخاب و پاسخ‌دهی به چک‌لیست پس از ثبت اولیه معامله فراهم می‌شود.
+          </p>
+        )}
+      </CollapsibleSection>
+
+
+      <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
+        {pendingTradeId ? (
+          <p className="text-sm text-emerald-600">
+            معامله با موفقیت ثبت شد. تصاویر و چک‌لیست را تکمیل و سپس «پایان» را بزنید.
+          </p>
+        ) : (
+          <span />
+        )}
+        <div className="flex gap-3">
+          {pendingTradeId ? (
+            <button
+              type="button"
+              onClick={handleFinish}
+              className="flex items-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700"
+            >
+              <Save className="h-4 w-4" />
+              پایان
+            </button>
           ) : (
-            <Save className="h-4 w-4" />
+            <button
+              type="submit"
+              disabled={isSubmitting || createMutation.isPending}
+              className="flex items-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700 disabled:opacity-50"
+            >
+              {createMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              ثبت معامله
+            </button>
           )}
-          ثبت معامله
-        </button>
+        </div>
       </div>
 
       {createMutation.isError && (
