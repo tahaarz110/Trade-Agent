@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String
+from sqlalchemy import DateTime, ForeignKey, Index, Integer, String
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -16,9 +16,16 @@ class ImportBatch(UUIDPKMixin, CreatedAtOnlyMixin, Base):
     """یک اجرای ایمپورت (MT5/MT4 EA Bridge/CSV) به همراه لاگ و آمار."""
 
     __tablename__ = "import_batches"
+    __table_args__ = (
+        # برای فهرست «تاریخچه ایمپورت‌های این حساب» (فاز ۶) در مقیاس بالا.
+        Index("ix_import_batches_account_id", "account_id"),
+    )
 
     account_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("accounts.id", ondelete="CASCADE"), nullable=False
+        # RESTRICT نه CASCADE: طبق همان اصلی که برای trades.account_id
+        # رفع شد، حذف یک حساب هرگز نباید تاریخچه ایمپورت آن را بی‌صدا
+        # نابود کند.
+        UUID(as_uuid=True), ForeignKey("accounts.id", ondelete="RESTRICT"), nullable=False
     )
     source: Mapped[str] = mapped_column(String(50), nullable=False)
     status: Mapped[str] = mapped_column(String(30), nullable=False, default="pending")

@@ -159,3 +159,56 @@ def test_delete_symbol_with_trades_is_blocked(client, account_id, symbol_id):
     )
     resp = client.delete(f"/symbols/{symbol_id}")
     assert resp.status_code == 422
+
+
+def test_delete_account_with_import_batch_is_blocked(client, account_id, db_session):
+    """رفع باگ کشف‌شده در بررسی عمیق پیش از فاز ۶: import_batches.account_id
+    قبلاً CASCADE بود (همان الگوی خطرناک trades.account_id) و حذف حساب
+    می‌توانست تاریخچه ایمپورت را بی‌صدا نابود کند؛ اکنون RESTRICT است."""
+    import uuid as uuid_module
+
+    from app.models.import_batch import ImportBatch
+
+    batch = ImportBatch(account_id=uuid_module.UUID(account_id), source="mt5_python", status="completed")
+    db_session.add(batch)
+    db_session.commit()
+
+    resp = client.delete(f"/accounts/{account_id}")
+    assert resp.status_code == 422
+
+
+def test_filter_trades_by_needs_review(client, account_id, symbol_id):
+    """رفع شکاف پیش‌نیاز فاز ۶: فیلتر needs_review روی فهرست معاملات."""
+    normal = client.post(
+        "/trades",
+        json={
+            "account_id": account_id,
+            "symbol_id": symbol_id,
+            "direction": "buy",
+            "entry_time": "2026-08-01T08:00:00Z",
+            "entry_price": "1.1",
+            "volume": "1.0",
+        },
+    ).json()
+    needs_review_trade = client.post(
+        "/trades",
+        json={
+            "account_id": account_id,
+            "symbol_id": symbol_id,
+            "direction": "sell",
+            "entry_time": "2026-08-02T08:00:00Z",
+            "entry_price": "1.2",
+            "volume": "1.0",
+        },
+    ).json()
+    client.patch(f"/trades/{needs_review_trade['id']}", json={"needs_review": True})
+
+    resp = client.get(f"/trades?account_id={account_id}&needs_review=true")
+    body = resp.json()
+    assert resp.status_code == 200
+    assert body["total"] == 1
+    assert body["items"][0]["id"] == needs_review_trade["id"]
+
+    resp2 = client.get(f"/trades?account_id={account_id}&needs_review=false")
+    assert resp2.json()["total"] == 1
+    assert resp2.json()["items"][0]["id"] == normal["id"]

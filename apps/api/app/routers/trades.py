@@ -40,6 +40,7 @@ def list_trades(
     direction: Optional[TradeDirection] = None,
     status_: Optional[TradeStatus] = Query(default=None, alias="status"),
     review_status: Optional[str] = None,
+    needs_review: Optional[bool] = None,
     date_from: Optional[date] = None,
     date_to: Optional[date] = None,
     field_id: Optional[uuid.UUID] = None,
@@ -47,7 +48,8 @@ def list_trades(
     db: Session = Depends(get_db),
 ) -> Page[TradeRead]:
     """فهرست صفحه‌بندی‌شده معاملات با فیلتر بر اساس حساب، نماد، جهت،
-    وضعیت، وضعیت بازبینی، بازه تاریخ، و فیلد پویا (field_id + field_value)."""
+    وضعیت، وضعیت بازبینی، needs_review (صف بازبینی فاز ۶)، بازه تاریخ،
+    و فیلد پویا (field_id + field_value)."""
     pagination = PaginationParams(page=page, page_size=page_size)
     filters = TradeFilters(
         account_id=account_id,
@@ -55,6 +57,7 @@ def list_trades(
         direction=direction,
         status=status_,
         review_status=review_status,
+        needs_review=needs_review,
         date_from=date_from,
         date_to=date_to,
         field_id=field_id,

@@ -88,6 +88,39 @@ export async function fetchSymbols(page = 1, pageSize = 200): Promise<Page<Symbo
   return request(`/symbols?page=${page}&page_size=${pageSize}`);
 }
 
+/**
+ * حساب‌ها و نمادها جداول «مرجع» با حجم کم هستند (بر خلاف معاملات که طبق
+ * پرامپت مادر هرگز نباید یک‌جا به حافظه فرانت‌اند بارگذاری شوند). چون
+ * سقف page_size بک‌اند ۲۰۰ است، اگر کاربر (مثلاً پس از ایمپورت MT5 در
+ * فاز ۶) بیش از ۲۰۰ نماد داشته باشد، فراخوانی تک‌صفحه‌ای fetchSymbols
+ * باقی نمادها را برای نگاشت نام/گزینه‌های فرم از قلم می‌انداخت. این
+ * تابع همه صفحات را پیمایش می‌کند؛ فقط برای این دو جدول کوچک استفاده
+ * شود، هرگز برای trades.
+ */
+async function fetchAllPages<T>(
+  fetchPage: (page: number, pageSize: number) => Promise<Page<T>>
+): Promise<T[]> {
+  const pageSize = 200;
+  let page = 1;
+  let all: T[] = [];
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const result = await fetchPage(page, pageSize);
+    all = all.concat(result.items);
+    if (all.length >= result.total || result.items.length === 0) break;
+    page += 1;
+  }
+  return all;
+}
+
+export async function fetchAllAccounts(): Promise<Account[]> {
+  return fetchAllPages<Account>((page, pageSize) => fetchAccounts(page, pageSize));
+}
+
+export async function fetchAllSymbols(): Promise<Symbol[]> {
+  return fetchAllPages<Symbol>((page, pageSize) => fetchSymbols(page, pageSize));
+}
+
 // --- Field sections / definitions ------------------------------------------------
 export async function fetchFieldSections(includeInactive = false): Promise<FieldSection[]> {
   return request(`/field-sections?include_inactive=${includeInactive}`);

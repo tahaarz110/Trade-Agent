@@ -18,9 +18,9 @@ import {
   attachmentUrl,
   createTrade,
   deleteAttachment,
-  fetchAccounts,
+  fetchAllAccounts,
+  fetchAllSymbols,
   fetchAttachments,
-  fetchSymbols,
   fetchTradeDetail,
   fetchTrades,
   uploadAttachment,
@@ -88,8 +88,8 @@ interface DynamicTradeFormProps {
 export function DynamicTradeForm({ onSuccess }: DynamicTradeFormProps) {
   const { sections, isLoading: sectionsLoading } = useDynamicFieldSchema();
 
-  const accountsQuery = useQuery({ queryKey: ["accounts"], queryFn: () => fetchAccounts() });
-  const symbolsQuery = useQuery({ queryKey: ["symbols"], queryFn: () => fetchSymbols() });
+  const accountsQuery = useQuery({ queryKey: ["accounts-all"], queryFn: fetchAllAccounts });
+  const symbolsQuery = useQuery({ queryKey: ["symbols-all"], queryFn: fetchAllSymbols });
 
   if (sectionsLoading || accountsQuery.isLoading || symbolsQuery.isLoading) {
     return (
@@ -102,8 +102,8 @@ export function DynamicTradeForm({ onSuccess }: DynamicTradeFormProps) {
   return (
     <TradeFormInner
       sections={sections}
-      accounts={accountsQuery.data?.items ?? []}
-      symbols={symbolsQuery.data?.items ?? []}
+      accounts={accountsQuery.data ?? []}
+      symbols={symbolsQuery.data ?? []}
       onSuccess={onSuccess}
     />
   );

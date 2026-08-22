@@ -10,11 +10,11 @@ import { Modal } from "@/components/ui/Modal";
 import { ChecklistCard } from "@/components/trade-form/ChecklistCard";
 import {
   attachmentUrl,
-  fetchAccounts,
+  fetchAllAccounts,
+  fetchAllSymbols,
   fetchAttachments,
   fetchFieldSections,
   fetchFieldDefinitions,
-  fetchSymbols,
   fetchTradeDetail,
 } from "@/lib/api";
 import { cn } from "@/lib/cn";
@@ -37,8 +37,8 @@ export function TradeDetailModal({ tradeId, onClose }: TradeDetailModalProps) {
     queryFn: () => fetchAttachments(tradeId as string),
     enabled: Boolean(tradeId),
   });
-  const accountsQuery = useQuery({ queryKey: ["accounts"], queryFn: () => fetchAccounts() });
-  const symbolsQuery = useQuery({ queryKey: ["symbols"], queryFn: () => fetchSymbols() });
+  const accountsQuery = useQuery({ queryKey: ["accounts-all"], queryFn: fetchAllAccounts });
+  const symbolsQuery = useQuery({ queryKey: ["symbols-all"], queryFn: fetchAllSymbols });
   const sectionsQuery = useQuery({
     queryKey: ["field-sections"],
     queryFn: () => fetchFieldSections(true),
@@ -51,11 +51,11 @@ export function TradeDetailModal({ tradeId, onClose }: TradeDetailModalProps) {
   const trade = tradeQuery.data;
 
   const accountName = useMemo(
-    () => accountsQuery.data?.items.find((a) => a.id === trade?.account_id)?.name ?? "—",
+    () => accountsQuery.data?.find((a) => a.id === trade?.account_id)?.name ?? "—",
     [accountsQuery.data, trade]
   );
   const symbolName = useMemo(
-    () => symbolsQuery.data?.items.find((s) => s.id === trade?.symbol_id)?.name ?? "—",
+    () => symbolsQuery.data?.find((s) => s.id === trade?.symbol_id)?.name ?? "—",
     [symbolsQuery.data, trade]
   );
 

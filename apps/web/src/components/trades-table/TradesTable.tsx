@@ -10,7 +10,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 
-import { fetchAccounts, fetchSymbols, fetchTrades, type TradeListFilters } from "@/lib/api";
+import { fetchAllAccounts, fetchAllSymbols, fetchTrades, type TradeListFilters } from "@/lib/api";
 import type { Trade } from "@/lib/types";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { cn } from "@/lib/cn";
@@ -26,8 +26,8 @@ export function TradesTable({ onRowClick }: TradesTableProps) {
   const [pageSize] = useState(20);
   const [filters, setFilters] = useState<TradeListFilters>({});
 
-  const accountsQuery = useQuery({ queryKey: ["accounts"], queryFn: () => fetchAccounts() });
-  const symbolsQuery = useQuery({ queryKey: ["symbols"], queryFn: () => fetchSymbols() });
+  const accountsQuery = useQuery({ queryKey: ["accounts-all"], queryFn: fetchAllAccounts });
+  const symbolsQuery = useQuery({ queryKey: ["symbols-all"], queryFn: fetchAllSymbols });
 
   const tradesQuery = useQuery({
     queryKey: ["trades", page, pageSize, filters],
@@ -36,13 +36,13 @@ export function TradesTable({ onRowClick }: TradesTableProps) {
 
   const symbolNameById = useMemo(() => {
     const map = new Map<string, string>();
-    symbolsQuery.data?.items.forEach((s) => map.set(s.id, s.name));
+    symbolsQuery.data?.forEach((s) => map.set(s.id, s.name));
     return map;
   }, [symbolsQuery.data]);
 
   const accountNameById = useMemo(() => {
     const map = new Map<string, string>();
-    accountsQuery.data?.items.forEach((a) => map.set(a.id, a.name));
+    accountsQuery.data?.forEach((a) => map.set(a.id, a.name));
     return map;
   }, [accountsQuery.data]);
 
@@ -139,7 +139,7 @@ export function TradesTable({ onRowClick }: TradesTableProps) {
           <SearchableSelect
             value={filters.account_id ?? null}
             onChange={(v) => updateFilter("account_id", (v as string) ?? "")}
-            options={(accountsQuery.data?.items ?? []).map((a) => ({ value: a.id, label: a.name }))}
+            options={(accountsQuery.data ?? []).map((a) => ({ value: a.id, label: a.name }))}
             placeholder="فیلتر بر اساس حساب"
           />
         </div>
@@ -147,7 +147,7 @@ export function TradesTable({ onRowClick }: TradesTableProps) {
           <SearchableSelect
             value={filters.symbol_id ?? null}
             onChange={(v) => updateFilter("symbol_id", (v as string) ?? "")}
-            options={(symbolsQuery.data?.items ?? []).map((s) => ({ value: s.id, label: s.name }))}
+            options={(symbolsQuery.data ?? []).map((s) => ({ value: s.id, label: s.name }))}
             placeholder="فیلتر بر اساس نماد"
           />
         </div>

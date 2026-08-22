@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from typing import Optional
 
-from sqlalchemy import Boolean, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, ForeignKey, Index, Integer, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -28,6 +28,7 @@ class ChecklistTemplate(UUIDPKMixin, TimestampMixin, Base):
 
 class ChecklistItem(UUIDPKMixin, Base):
     __tablename__ = "checklist_items"
+    __table_args__ = (Index("ix_checklist_items_template_id", "template_id"),)
 
     template_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -54,6 +55,10 @@ class TradeChecklistAnswer(UUIDPKMixin, TimestampMixin, Base):
         UniqueConstraint(
             "trade_id", "checklist_item_id", name="uq_trade_checklist_answers_trade_item"
         ),
+        # برای بررسی «آیا این آیتم پاسخ تاریخی دارد» (چک محافظت حذف)
+        # که به‌تنهایی روی checklist_item_id فیلتر می‌کند و از پیشوند
+        # چپ محدودیت یکتای بالا (trade_id) بهره نمی‌برد.
+        Index("ix_trade_checklist_answers_checklist_item_id", "checklist_item_id"),
     )
 
     trade_id: Mapped[uuid.UUID] = mapped_column(

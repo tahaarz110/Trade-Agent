@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/Input";
 import {
   createAccount,
   deleteAccount,
-  fetchAccounts,
+  fetchAllAccounts,
   updateAccount,
 } from "@/lib/api";
 import type { Account, AccountType } from "@/lib/types";
@@ -21,7 +21,7 @@ const ACCOUNT_TYPE_LABELS: Record<AccountType, string> = {
 
 export function AccountsSettings() {
   const queryClient = useQueryClient();
-  const accountsQuery = useQuery({ queryKey: ["accounts"], queryFn: () => fetchAccounts() });
+  const accountsQuery = useQuery({ queryKey: ["accounts-all"], queryFn: fetchAllAccounts });
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState("");
   const [accountType, setAccountType] = useState<AccountType>("demo");
@@ -56,7 +56,7 @@ export function AccountsSettings() {
     onError: (error: Error) => window.alert(`حذف حساب ممکن نشد: ${error.message}`),
   });
 
-  const accounts = accountsQuery.data?.items ?? [];
+  const accounts = accountsQuery.data ?? [];
 
   return (
     <div className="space-y-4">

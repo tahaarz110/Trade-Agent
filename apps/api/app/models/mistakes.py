@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from typing import Optional
 
-from sqlalchemy import Boolean, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, ForeignKey, Index, Integer, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -33,6 +33,10 @@ class MistakeCost(UUIDPKMixin, CreatedAtOnlyMixin, Base):
     __tablename__ = "mistake_costs"
     __table_args__ = (
         UniqueConstraint("trade_id", "mistake_tag_id", name="uq_mistake_costs_trade_tag"),
+        # برای گزارش‌های آینده «هزینه هر برچسب اشتباه در کل معاملات»
+        # (فازهای بعدی موتور تحلیلی) که به‌تنهایی روی mistake_tag_id
+        # فیلتر می‌کنند.
+        Index("ix_mistake_costs_mistake_tag_id", "mistake_tag_id"),
     )
 
     trade_id: Mapped[uuid.UUID] = mapped_column(

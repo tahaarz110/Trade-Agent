@@ -9,6 +9,7 @@ from sqlalchemy import (
     Date,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     Numeric,
     String,
@@ -93,6 +94,7 @@ class FieldOption(UUIDPKMixin, Base):
     """گزینه‌های انتخابی برای فیلدهای select/radio/checkbox/multi_select."""
 
     __tablename__ = "field_options"
+    __table_args__ = (Index("ix_field_options_field_id", "field_id"),)
 
     field_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("field_definitions.id", ondelete="CASCADE"), nullable=False
@@ -115,6 +117,16 @@ class TradeFieldValue(UUIDPKMixin, TimestampMixin, Base):
     __tablename__ = "trade_field_values"
     __table_args__ = (
         UniqueConstraint("trade_id", "field_id", name="uq_trade_field_values_trade_field"),
+        # ایندکس مستقل روی field_id: محدودیت یکتای بالا فقط برای کوئری‌های
+        # trade_id-first بهینه است (مثل «مقادیر این معامله»)؛ عملیات
+        # زیر روی field_id به‌تنهایی فیلتر می‌کنند (بررسی حذف مخرب فیلد،
+        # بررسی استفاده از گزینه، فیلتر داینامیک معاملات بر اساس فیلد)
+        # و بدون این ایندکس در حجم بالا (صدها هزار معامله طبق پرامپت
+        # مادر) به اسکن کامل جدول می‌انجامند.
+        Index("ix_trade_field_values_field_id", "field_id"),
+        # ایندکس GIN برای کوئری‌های containment روی value_json (مقادیر
+        # چندانتخابی) که در بررسی استفاده از گزینه به کار می‌رود.
+        Index("ix_trade_field_values_value_json_gin", "value_json", postgresql_using="gin"),
     )
 
     trade_id: Mapped[uuid.UUID] = mapped_column(

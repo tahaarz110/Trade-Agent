@@ -5,11 +5,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 
 import { Input } from "@/components/ui/Input";
-import { createSymbol, deleteSymbol, fetchSymbols, updateSymbol } from "@/lib/api";
+import { createSymbol, deleteSymbol, fetchAllSymbols, updateSymbol } from "@/lib/api";
 
 export function SymbolsSettings() {
   const queryClient = useQueryClient();
-  const symbolsQuery = useQuery({ queryKey: ["symbols"], queryFn: () => fetchSymbols() });
+  const symbolsQuery = useQuery({ queryKey: ["symbols-all"], queryFn: fetchAllSymbols });
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -38,7 +38,7 @@ export function SymbolsSettings() {
     onError: (error: Error) => window.alert(`حذف نماد ممکن نشد: ${error.message}`),
   });
 
-  const symbols = symbolsQuery.data?.items ?? [];
+  const symbols = symbolsQuery.data ?? [];
 
   return (
     <div className="space-y-4">

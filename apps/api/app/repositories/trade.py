@@ -19,6 +19,7 @@ class TradeFilters:
     direction: Optional[TradeDirection] = None
     status: Optional[TradeStatus] = None
     review_status: Optional[str] = None
+    needs_review: Optional[bool] = None
     date_from: Optional[date] = None
     date_to: Optional[date] = None
     field_id: Optional[uuid.UUID] = None
@@ -35,6 +36,11 @@ class TradeFilters:
             stmt = stmt.where(Trade.status == self.status)
         if self.review_status is not None:
             stmt = stmt.where(Trade.review_status == self.review_status)
+        if self.needs_review is not None:
+            # از ایندکس اختصاصی ix_trades_needs_review بهره می‌برد؛ صف
+            # بازبینی فاز ۶ (معاملات ایمپورت‌شده نیازمند بررسی) از همین
+            # فیلتر روی endpoint فهرست معاملات موجود استفاده می‌کند.
+            stmt = stmt.where(Trade.needs_review == self.needs_review)
         if self.date_from is not None:
             stmt = stmt.where(
                 Trade.entry_time

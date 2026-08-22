@@ -46,15 +46,29 @@ class FieldOptionRepository(BaseRepository[FieldOption]):
 
     def is_option_value_used(self, field_id, option_value: str) -> bool:
         """بررسی می‌کند آیا مقدار این گزینه در هیچ معامله‌ای ثبت شده یا نه
-        (برای متن تکی value_text یا برای چندانتخابی درون value_json)."""
-        rows = (
-            self.db.query(TradeFieldValue.value_text, TradeFieldValue.value_json)
-            .filter_by(field_id=field_id)
-            .all()
+        (برای متن تکی value_text یا برای چندانتخابی درون value_json).
+
+        فیلتر کاملاً در سطح SQL انجام می‌شود (نه لود همه ردیف‌ها به
+        پایتون) و از ایندکس field_id + ایندکس GIN روی value_json بهره
+        می‌برد؛ برای مقیاس صدها هزار معامله ضروری است (رفع‌شده در بررسی
+        عمیق پیش از فاز ۶؛ نسخه قبلی همه ردیف‌های یک فیلد را به حافظه
+        اپلیکیشن لود می‌کرد)."""
+        text_match = (
+            self.db.query(TradeFieldValue.id)
+            .filter(TradeFieldValue.field_id == field_id, TradeFieldValue.value_text == option_value)
+            .limit(1)
+            .first()
         )
-        for value_text, value_json in rows:
-            if value_text == option_value:
-                return True
-            if isinstance(value_json, list) and option_value in value_json:
-                return True
-        return False
+        if text_match is not None:
+            return True
+
+        json_match = (
+            self.db.query(TradeFieldValue.id)
+            .filter(
+                TradeFieldValue.field_id == field_id,
+                TradeFieldValue.value_json.contains([option_value]),
+            )
+            .limit(1)
+            .first()
+        )
+        return json_match is not None

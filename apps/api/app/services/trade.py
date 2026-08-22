@@ -6,7 +6,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Any, Optional
 
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models.enums import FieldType
 from app.models.field import FieldDefinition
@@ -189,10 +189,15 @@ class TradeService:
 
     def get_detail(self, trade_id: uuid.UUID) -> TradeDetailRead:
         trade = self.get(trade_id)
+        # joinedload اجباری است: .join(FieldDefinition) به‌تنهایی مقدار
+        # رابطه v.field را eager نمی‌کند و دسترسی به v.field.slug/title
+        # در حلقه زیر بدون این گزینه یک کوئری جداگانه به ازای هر مقدار
+        # فیلد پویا می‌زند (N+1 واقعی که با رشد تعداد فیلدهای پویای هر
+        # معامله در مقیاس بالا قابل توجه می‌شود).
         values = (
             self.db.query(TradeFieldValue)
             .filter_by(trade_id=trade_id)
-            .join(FieldDefinition)
+            .options(joinedload(TradeFieldValue.field))
             .all()
         )
         custom_fields = []

@@ -53,6 +53,6 @@ class AccountService:
         except IntegrityError as exc:
             self.db.rollback()
             raise ValidationAppError(
-                "این حساب دارای معاملات ثبت‌شده است و برای حفظ یکپارچگی تاریخچه "
+                "این حساب دارای معاملات یا سابقه ایمپورت ثبت‌شده است و برای حفظ یکپارچگی تاریخچه "
                 "قابل حذف نیست؛ به‌جای حذف، آن را غیرفعال کنید"
             ) from exc

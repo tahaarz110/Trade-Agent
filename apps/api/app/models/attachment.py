@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from typing import Optional
 
-from sqlalchemy import ForeignKey, Integer, String, Text
+from sqlalchemy import ForeignKey, Index, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -15,6 +15,12 @@ class Attachment(UUIDPKMixin, CreatedAtOnlyMixin, Base):
     """پیوست تصویری/فایلی یک معامله (اسکرین‌شات چارت و غیره)."""
 
     __tablename__ = "attachments"
+    __table_args__ = (
+        # بدون این ایندکس، نمایش گالری تصاویر هر معامله (فراخوانی‌شده
+        # در هر بار باز شدن مودال جزئیات) با رشد جدول attachments در
+        # مقیاس صدها هزار معامله به اسکن کامل جدول تبدیل می‌شود.
+        Index("ix_attachments_trade_id", "trade_id"),
+    )
 
     trade_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("trades.id", ondelete="CASCADE"), nullable=False

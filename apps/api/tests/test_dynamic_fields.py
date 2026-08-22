@@ -222,6 +222,29 @@ def test_delete_used_option_is_blocked(client, account_id, symbol_id):
     assert resp.status_code == 422
 
 
+def test_delete_used_multi_select_option_is_blocked(client, account_id, symbol_id):
+    """رفع باگ مقیاس‌پذیری پیش از فاز ۶: is_option_value_used باید مسیر
+    value_json (چندانتخابی) را هم با کوئری SQL (نه لود به پایتون)
+    درست تشخیص دهد."""
+    section = _create_section(client)
+    field = _create_field(
+        client, section["id"], slug="opt_field_multi", field_type="multi_select", options=["X", "Y", "Z"]
+    )
+    options = client.get(f"/field-definitions/{field['id']}/options").json()
+    option_x = next(o for o in options if o["value"] == "X")
+    option_z = next(o for o in options if o["value"] == "Z")
+
+    _create_trade(client, account_id, symbol_id, custom_fields={"opt_field_multi": ["X", "Y"]})
+
+    # X در معامله استفاده شده => حذف مسدود
+    resp_x = client.delete(f"/field-options/{option_x['id']}")
+    assert resp_x.status_code == 422
+
+    # Z اصلاً استفاده نشده => حذف باید موفق باشد
+    resp_z = client.delete(f"/field-options/{option_z['id']}")
+    assert resp_z.status_code == 204
+
+
 # --- اعتبارسنجی مقدار در ثبت معامله --------------------------------------------
 def test_trade_rejects_invalid_select_option(client, account_id, symbol_id):
     section = _create_section(client)

@@ -35,6 +35,9 @@ class Trade(UUIDPKMixin, TimestampMixin, Base):
         Index("ix_trades_symbol_id", "symbol_id"),
         Index("ix_trades_status", "status"),
         Index("ix_trades_needs_review", "needs_review"),
+        # برای بررسی «آیا این قالب چک‌لیست توسط معامله‌ای استفاده شده»
+        # (چک محافظت حذف قالب، فاز ۵.۵) در مقیاس بالا.
+        Index("ix_trades_checklist_template_id", "checklist_template_id"),
     )
 
     account_id: Mapped[uuid.UUID] = mapped_column(
